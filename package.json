@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/open-meadow/tinyapp/issues"
   },
-  "homepage": "https://github.com/open-meadow/tinyapp#readme"
+  "homepage": "https://github.com/open-meadow/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
