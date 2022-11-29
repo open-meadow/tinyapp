@@ -57,8 +57,10 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body);
   let newUrl = getRandomString();
-  urlDatabase[newUrl] = req.body;
-  res.send("Ok");
+  urlDatabase[newUrl] = req.body.longURL;
+  // res.send("Ok");
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars)
 });
 
 app.get("/u/:id", (req, res) => {
