@@ -61,10 +61,17 @@ app.post("/urls", (req, res) => {
   // res.send("Ok");
   // Redirect to URL Index with new Url
   const templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars)
+  res.render("urls_index", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
   const longUrl = urlDatabase[req.params.id];
   res.redirect(longUrl);
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  console.log(req.params);
+  delete urlDatabase[req.params.id];
+  // const templateVars = { urls: urlDatabase };
+  res.redirect("/urls");
 });
