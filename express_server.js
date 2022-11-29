@@ -59,6 +59,7 @@ app.post("/urls", (req, res) => {
   let newUrl = getRandomString();
   urlDatabase[newUrl] = req.body.longURL;
   // res.send("Ok");
+  // Redirect to URL Index with new Url
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars)
 });
