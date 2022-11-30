@@ -80,7 +80,7 @@ app.get("/hello", (req, res) => {
 // render urls_index page. can refresh here to retest
 app.get("/urls", (req, res) => {
   
-  console.log("Inside /urls route handler", req.cookies["user_id"]);
+  // console.log("Inside /urls route handler", req.cookies["user_id"]);
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
 
   res.render("urls_index", templateVars);
@@ -102,7 +102,7 @@ app.get("/urls/:id", (req, res) => {
 
 // This section creates a new URL and adds it to the index
 app.post("/urls", (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   let newUrl = getRandomString();
   urlDatabase[newUrl] = req.body.longURL;
   
@@ -163,7 +163,7 @@ app.post("/login", (req, res) => {
 // this section lets the user log out and clears all cookies
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 // this section leads to the registration page
