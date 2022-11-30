@@ -3,10 +3,11 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 
-app.use(cookieParser());
+app.use(cookieParser()); // allows use and transfer of cookies
 
-app.set("view engine", "ejs");
+app.set("view engine", "ejs"); // allows use of ejs
 
+// function to get tandom string to create smaller URL
 const getRandomString = () => {
   // credit to - https://attacomsian.com/blog/javascript-generate-random-string
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -20,11 +21,28 @@ const getRandomString = () => {
   return str;
 };
 
+// URL Database. New URL's will be added here
 const urlDatabase = {
   "b2xVn2" : "http://www.lighthouselabs.ca",
   "9sm5xK" : "http://www.google.com",
 };
 
+// User database. New users will be added here.
+const users = {
+  userRandomId: {
+    id:"userRandomID",
+    email:"user@example.com",
+    password:"purple-monkey-dinosaur",
+  },
+
+  user2RandomId: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
+// Test. Delete later
 app.get("/", (req, res) => {
   res.send("Hello");
 });
@@ -33,16 +51,20 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
 
+// Express middleware
 app.use(express.urlencoded({ extended: true }));
 
+// Show urlDatabase as JSON file
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// unneeded...remove later
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b><body><html>");
 });
 
+// render urls_index page
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
   res.render("urls_index", templateVars);
@@ -103,4 +125,10 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
+});
+
+// this section leads to the registration page
+app.get("/register", (req, res) => {
+  const templateVars = { username: "" };
+  res.render("url_register", templateVars);
 });
