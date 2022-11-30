@@ -134,6 +134,12 @@ app.post("/urls/:id/longURL", (req, res) => {
   res.redirect("/urls");
 });
 
+// this section leads the user to the login page
+app.get("/login", (req, res) => {
+  const templateVars = { user: null };
+  res.render("urls_login", templateVars);
+})
+
 // this section lets the user log in
 app.post("/login", (req, res) => {
   // console.log(req.body.username);
