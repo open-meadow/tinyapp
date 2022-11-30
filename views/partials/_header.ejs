@@ -11,11 +11,23 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <form method="POST" action="/login">
-      <div class="form-check form-check-inline">
-        <input class="form-control form-control" type="text" name="username" placeholder="Username">
-        <button type="submit" class="btn btn-outline-light">Login</button>
+    <% if(!username) { %>
+      <div>
+        <form method="POST" action="/login">
+          <div class="form-check form-check-inline">
+            <input class="form-control form-control" type="text" name="username" placeholder="Username">
+            <button type="submit" class="btn btn-outline-light">Login</button>
+          </div>
+        </form>
+
       </div>
-    </form>
+      <% } else { %>
+        <div>Logged in as: <%= username %>  </div>
+        <form method="POST" action="/logout">
+          <button type="submit" class="btn btn-outline-light">Logout</button>
+        </form>
+
+        <% } %>
+
   </nav>
 </header>
