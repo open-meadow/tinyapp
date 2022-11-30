@@ -29,13 +29,13 @@ const urlDatabase = {
 
 // User database. New users will be added here.
 const users = {
-  userRandomId: {
+  userRandomID: {
     id:"userRandomID",
     email:"user@example.com",
     password:"purple-monkey-dinosaur",
   },
 
-  user2RandomId: {
+  user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk",
@@ -80,6 +80,7 @@ app.get("/hello", (req, res) => {
 // render urls_index page. can refresh here to retest
 app.get("/urls", (req, res) => {
   
+  console.log("Inside /urls route handler", req.cookies["user_id"]);
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
 
   res.render("urls_index", templateVars);
@@ -142,9 +143,21 @@ app.get("/login", (req, res) => {
 
 // this section lets the user log in
 app.post("/login", (req, res) => {
-  // console.log(req.body.username);
-  // res.cookie("username", req.body.username);
-  res.redirect("/urls");
+  
+  const passwordCheck = req.body.password;
+
+  // check if email is present in database
+  const existingUser = checkUserDatabase(req.body.email);
+  console.log(existingUser);
+
+  // check if email and password are correct
+  if (existingUser && existingUser.password === passwordCheck) {
+    res.cookie("user_id", existingUser.id);
+    res.redirect("/urls");
+  } else {
+    res.status(400).send("Invalid credentials");
+  }
+
 });
 
 // this section lets the user log out and clears all cookies
