@@ -44,12 +44,16 @@ const users = {
 
 // Function that checks user database to see if the same email has been input
 const checkUserDatabase = (newEmail) => {
-  for (i in users) {
-    console.log(i);
+  let objKeys = Object.keys(users);
+  
+  for (let i = 0; i < objKeys.length; i++) {
+    if (newEmail === users[objKeys[i]].email) {
+      return users[objKeys[i]];
+    }
   }
-}
 
-checkUserDatabase();
+  return null;
+}
 
 // Test. Delete later
 app.get("/", (req, res) => {
@@ -151,9 +155,19 @@ app.get("/register", (req, res) => {
 
 // this section adds a new user to the Users database
 app.post("/register", (req, res) => {
+
+  if((req.body.email).length === 0) {
+    res.status(400).send("Please input an email");
+  }
+
+  const emailPresent = checkUserDatabase(req.body.email) // checks if e-mail is already present 
+  if(emailPresent) {
+    res.status(400).send("Invalid credentials");
+  }
+  
+  
   let newRandomId = getRandomString();
   users[newRandomId] = { id: newRandomId, email: req.body.email, password: req.body.password};
-  console.log(users);
   res.cookie("user_id", newRandomId);
   res.redirect("/urls");
 });
