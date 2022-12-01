@@ -14,7 +14,7 @@ const getUserByEmail = (newEmail, users) => {
 }
 
 // check the URL's a user ID has saved
-const urlsForUser = (id) => {
+const urlsForUser = (id, urlDatabase) => {
   let objKeys = Object.keys(urlDatabase);
   let urlArrs = [];
 

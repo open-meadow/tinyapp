@@ -90,8 +90,8 @@ app.get("/urls/:id", (req, res) => {
   }
 
   // checks if user owns the id
-  let checkWebsite = urlsForUser(req.session.user_id);
-  console.log("Check user: ", urlsForUser(req.session.user_id));
+  let checkWebsite = urlsForUser(req.session.user_id, urlDatabase);
+  // console.log("Check user: ", urlsForUser(req.session.user_id));
 
   // shows url info
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: users[req.session.user_id], ownsID: (checkWebsite.includes(urlDatabase[req.params.id].longURL)) };
@@ -143,8 +143,8 @@ app.post("/urls/:id/delete", (req, res) => {
 
   // checks if user owns the id
 
-  let checkWebsite = urlsForUser(req.session.user_id);
-  console.log("Check user: ", urlsForUser(req.session.user_id));
+  let checkWebsite = urlsForUser(req.session.user_id, urlDatabase);
+  // console.log("Check user: ", urlsForUser(req.session.user_id));
 
   if (!(checkWebsite.includes(urlDatabase[req.params.id].longURL))) {
     res.send("This user does not own the url", 403);
