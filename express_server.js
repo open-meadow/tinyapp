@@ -1,4 +1,5 @@
 const express = require("express");
+const methodOverride = require("method-override");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const { name } = require("ejs");
@@ -7,6 +8,8 @@ const PORT = 8080; // default port 8080
 
 const { getUserByEmail, urlsForUser } = require('./helpers');
 const { users, urlDatabase } = require('./database');
+
+app.use(methodOverride("_method")); // uses method overwrite
 
 app.use(cookieSession({
   name: 'user_id',
@@ -28,13 +31,6 @@ const getRandomString = () => {
 
   return str;
 };
-
-
-
-
-
-
-
 
 // Test. Delete later
 app.get("/", (req, res) => {
@@ -132,7 +128,8 @@ app.get("/u/:id", (req, res) => {
 });
 
 // this section deletes an id and URL
-app.post("/urls/:id/delete", (req, res) => {
+
+app.delete("/urls/:id", (req, res) => {
 
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
@@ -157,7 +154,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 // this section updates the long URL of an ID
-app.post("/urls/:id/longURL", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });

@@ -24,7 +24,7 @@
         </p>
 
         <!--This section adds new URL-->
-        <form method="POST" action="/urls/<%= id %>/longURL" class="p-3 mb-2 bg-light text-dark">
+        <form method="POST" action="/urls/<%= id %>?_method=PUT" class="p-3 mb-2 bg-light text-dark">
           <div style="font-weight: bold;">Edit</div>
           <div class="form-group mb-2">
             <label for="longURL">New URL:</label>
