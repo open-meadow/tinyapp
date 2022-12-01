@@ -1,3 +1,4 @@
+// declare modules
 const express = require("express");
 const methodOverride = require("method-override");
 const cookieSession = require('cookie-session');
@@ -6,9 +7,11 @@ const { name } = require("ejs");
 const app = express();
 const PORT = 8080; // default port 8080
 
-const { getUserByEmail, urlsForUser } = require('./helpers');
+// import functions and databases from other files
+const { getRandomString, getUserByEmail, urlsForUser } = require('./helpers');
 const { users, urlDatabase } = require('./database');
 
+// use middleware and modules and config
 app.use(methodOverride("_method")); // uses method overwrite
 
 app.use(cookieSession({
@@ -16,48 +19,28 @@ app.use(cookieSession({
   keys: ["sajdnjskanfkjahdil"]
 })); // allows use and transfer of cookies
 
+app.use(express.urlencoded({ extended: true })); // Express middleware
+
 app.set("view engine", "ejs"); // allows use of ejs
-
-// function to get random string to create smaller URL and userID
-const getRandomString = () => {
-  // credit to - https://attacomsian.com/blog/javascript-generate-random-string
-  let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  //Pick characters randomly
-  let str = '';
-  for (let i = 0; i < 6; i++) {
-    str += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-
-  return str;
-};
-
-// Test. Delete later
-app.get("/", (req, res) => {
-  res.send("Hello");
-});
-
+ 
+// Listen for client
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
 
-// Express middleware
-app.use(express.urlencoded({ extended: true }));
 
 // Show urlDatabase as JSON file
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// unneeded...remove later
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b><body><html>");
-});
-
 // render urls_index page. can refresh here to retest
 app.get("/urls", (req, res) => {
 
-  const templateVars = { urls: urlDatabase, user: users[req.session.user_id] };
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: users[req.session.user_id] 
+  };
 
   res.render("urls_index", templateVars);
 });
@@ -71,7 +54,6 @@ app.get("/urls/new", (req, res) => {
   }
 
   const templateVars = { user: users[req.session.user_id] };
-
   res.render("urls_new", templateVars);
 });
 
@@ -80,17 +62,20 @@ app.get("/urls/:id", (req, res) => {
 
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
-
   if (!checkID) {
     res.send("<html>This ID Does Not Exist.</html>");
   }
 
   // checks if user owns the id
   let checkWebsite = urlsForUser(req.session.user_id, urlDatabase);
-  // console.log("Check user: ", urlsForUser(req.session.user_id));
 
   // shows url info
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: users[req.session.user_id], ownsID: (checkWebsite.includes(urlDatabase[req.params.id].longURL)) };
+  const templateVars = { 
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id].longURL, 
+    user: users[req.session.user_id], 
+    ownsID: (checkWebsite.includes(urlDatabase[req.params.id].longURL)) 
+  };
 
   res.render("urls_show", templateVars);
 });
@@ -104,8 +89,10 @@ app.post("/urls", (req, res) => {
   }
 
   let newUrl = getRandomString();
-  console.log("Current session", req.session);
-  urlDatabase[newUrl] = { userID: req.session.user_id, longURL: req.body.longURL }
+  urlDatabase[newUrl] = { 
+    userID: req.session.user_id, 
+    longURL: req.body.longURL 
+  };
 
   // Redirect to URL Index with new Url
   const templateVars = { urls: urlDatabase, user: users[req.session.user_id] };
@@ -128,27 +115,21 @@ app.get("/u/:id", (req, res) => {
 });
 
 // this section deletes an id and URL
-
 app.delete("/urls/:id", (req, res) => {
 
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
-
   if (!checkID) {
     res.send("<html>This ID Does Not Exist.</html>");
   }
 
   // checks if user owns the id
-
   let checkWebsite = urlsForUser(req.session.user_id, urlDatabase);
-  // console.log("Check user: ", urlsForUser(req.session.user_id));
-
   if (!(checkWebsite.includes(urlDatabase[req.params.id].longURL))) {
     res.send("This user does not own the url", 403);
     return;
   }
 
-  
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
@@ -188,7 +169,6 @@ app.post("/login", (req, res) => {
     console.log("Existing user password: ", existingUser.password);
 
     if (passwordCheck) {
-      // res.cookie("user_id", existingUser.id); - Old syntax, when using cookie parser
       req.session.user_id = existingUser.id;
       res.redirect("/urls");
     } else {
@@ -203,7 +183,6 @@ app.post("/login", (req, res) => {
 
 // this section lets the user log out and clears all cookies
 app.post("/logout", (req, res) => {
-  // res.clearCookie("user_id");
   req.session = null;
   res.redirect("/login");
 });
@@ -232,12 +211,10 @@ app.post("/register", (req, res) => {
     res.status(400).send("Invalid credentials");
   }
 
-
   let newRandomId = getRandomString();
   let hashedPassword = bcrypt.hashSync(req.body.password, 10);
   console.log("New hashed password", hashedPassword);
   users[newRandomId] = { id: newRandomId, email: req.body.email, password: hashedPassword };
-  // res.cookie("user_id", newRandomId); - Old cookie-parser syntax
   req.session.user_id = newRandomId;
   res.redirect("/urls");
 });

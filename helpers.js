@@ -1,5 +1,20 @@
 const { users, urlDatabase } = require('./database');
 
+// function to get random string to create smaller URL and userID
+const getRandomString = () => {
+  // credit to - https://attacomsian.com/blog/javascript-generate-random-string
+  let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  //Pick characters randomly
+  let str = '';
+  for (let i = 0; i < 6; i++) {
+    str += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  return str;
+};
+
+
 // Function that checks user database to see if the same email has been input
 const getUserByEmail = (newEmail, users) => {
   let objKeys = Object.keys(users);
@@ -27,4 +42,4 @@ const urlsForUser = (id, urlDatabase) => {
   return urlArrs;
 };
 
-module.exports = { getUserByEmail, urlsForUser };
+module.exports = { getRandomString, getUserByEmail, urlsForUser };
