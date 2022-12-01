@@ -1,10 +1,14 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const { name } = require("ejs");
 const app = express();
 const PORT = 8080; // default port 8080
 
-app.use(cookieParser()); // allows use and transfer of cookies
+app.use(cookieSession({
+  name: 'user_id',
+  keys: ["sajdnjskanfkjahdil"]
+})); // allows use and transfer of cookies
 
 app.set("view engine", "ejs"); // allows use of ejs
 
@@ -101,7 +105,7 @@ app.get("/hello", (req, res) => {
 // render urls_index page. can refresh here to retest
 app.get("/urls", (req, res) => {
 
-  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  const templateVars = { urls: urlDatabase, user: users[req.session.user_id] };
 
   res.render("urls_index", templateVars);
 });
@@ -114,7 +118,7 @@ app.get("/urls/new", (req, res) => {
     res.redirect("/login");
   }
 
-  const templateVars = { user: users[req.cookies["user_id"]] };
+  const templateVars = { user: users[req.session.user_id] };
 
   res.render("urls_new", templateVars);
 });
@@ -130,10 +134,10 @@ app.get("/urls/:id", (req, res) => {
   }
 
   // checks if user owns the id
-  let checkUser = urlsForUser(req.cookies["user_id"]);
+  let checkUser = urlsForUser(req.session.user_id);
 
   // shows url info
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: users[req.cookies["user_id"]], ownsID: (checkUser === urlDatabase[req.params.id].longURL) };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: users[req.session.user_id], ownsID: (checkUser === urlDatabase[req.params.id].longURL) };
 
   res.render("urls_show", templateVars);
 });
@@ -147,10 +151,10 @@ app.post("/urls", (req, res) => {
   }
 
   let newUrl = getRandomString();
-  urlDatabase[newUrl] = { userID: req.cookies["user_id"], longURL: req.body.longURL }
+  urlDatabase[newUrl] = { userID: req.session.user_id, longURL: req.body.longURL }
 
   // Redirect to URL Index with new Url
-  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  const templateVars = { urls: urlDatabase, user: users[req.session.user_id] };
 
   // add new user
   res.render("urls_index", templateVars);
@@ -180,7 +184,7 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 
   // checks if user owns the id
-  let checkUser = urlsForUser(req.cookies["user_id"]);
+  let checkUser = urlsForUser(req.session.user_id);
   if (checkUser !== urlDatabase[req.params.id].longURL) {
     res.send("This user does not own the url", 403);
     return;
@@ -201,7 +205,7 @@ app.post("/urls/:id/longURL", (req, res) => {
 app.get("/login", (req, res) => {
 
   // if user is already logged in, redirect to /urls
-  if (req.cookies["user_id"]) {
+  if (req.session.user_id) {
     res.redirect("/urls");
   }
 
@@ -226,7 +230,8 @@ app.post("/login", (req, res) => {
     console.log("Existing user password: ", existingUser.password);
 
     if (passwordCheck) {
-      res.cookie("user_id", existingUser.id);
+      // res.cookie("user_id", existingUser.id); - Old syntax, when using cookie parser
+      req.session.user_id = existingUser.id;
       res.redirect("/urls");
     } else {
       res.send("Invalid credentials", 400);
@@ -240,7 +245,8 @@ app.post("/login", (req, res) => {
 
 // this section lets the user log out and clears all cookies
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  // res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/login");
 });
 
@@ -248,7 +254,7 @@ app.post("/logout", (req, res) => {
 app.get("/register", (req, res) => {
 
   // if user is already logged in, redirect to /urls
-  if (req.cookies["user_id"]) {
+  if (req.session.user_id) {
     res.redirect("/urls");
   }
 
@@ -273,6 +279,7 @@ app.post("/register", (req, res) => {
   let hashedPassword = bcrypt.hashSync(req.body.password, 10);
   console.log("New hashed password", hashedPassword);
   users[newRandomId] = { id: newRandomId, email: req.body.email, password: hashedPassword };
-  res.cookie("user_id", newRandomId);
+  // res.cookie("user_id", newRandomId); - Old cookie-parser syntax
+  req.session.user_id = newRandomId;
   res.redirect("/urls");
 });
