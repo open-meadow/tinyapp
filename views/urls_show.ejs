@@ -10,6 +10,7 @@
 
 <body>
   <%- include('./partials/_header'); -%>
+  <!--This section displays the current URL-->
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
@@ -20,6 +21,7 @@
             <%= id %>
           </a>
         </p>
+        <!--This section adds new URL-->
         <form method="POST" action="/urls/<%= id %>/longURL" class="p-3 mb-2 bg-light text-dark">
           <div style="font-weight: bold;">Edit</div>
           <div class="form-group mb-2">
