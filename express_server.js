@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -7,14 +8,14 @@ app.use(cookieParser()); // allows use and transfer of cookies
 
 app.set("view engine", "ejs"); // allows use of ejs
 
-// function to get tandom string to create smaller URL
+// function to get random string to create smaller URL and userID
 const getRandomString = () => {
   // credit to - https://attacomsian.com/blog/javascript-generate-random-string
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   //Pick characters randomly
   let str = '';
-  for(let i = 0; i < 6; i++) {
+  for (let i = 0; i < 6; i++) {
     str += chars.charAt(Math.floor(Math.random() * chars.length));
   }
 
@@ -24,9 +25,9 @@ const getRandomString = () => {
 // User database. New users will be added here.
 const users = {
   userRandomID: {
-    id:"userRandomID",
-    email:"user@example.com",
-    password:"purple-monkey-dinosaur",
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
   },
 
   user2RandomID: {
@@ -38,11 +39,11 @@ const users = {
 
 // URL Database. New URL's will be added here
 const urlDatabase = {
-  "b2xVn2" : {
+  "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
-    userID: "userRandomID" ,
+    userID: "userRandomID",
   },
-  "9sm5xK" : {
+  "9sm5xK": {
     longURL: "http://www.google.com",
     userID: "user2RandomID",
   },
@@ -52,7 +53,7 @@ const urlDatabase = {
 // Function that checks user database to see if the same email has been input
 const checkUserDatabase = (newEmail) => {
   let objKeys = Object.keys(users);
-  
+
   for (let i = 0; i < objKeys.length; i++) {
     if (newEmail === users[objKeys[i]].email) {
       return users[objKeys[i]];
@@ -66,7 +67,7 @@ const checkUserDatabase = (newEmail) => {
 const urlsForUser = (id) => {
   let objKeys = Object.keys(urlDatabase);
 
-  for(let i = 0; i < objKeys.length; i++) {
+  for (let i = 0; i < objKeys.length; i++) {
     if (id === urlDatabase[objKeys[i]].userID) {
       return urlDatabase[objKeys[i]].longURL;
     }
@@ -98,9 +99,8 @@ app.get("/hello", (req, res) => {
 });
 
 // render urls_index page. can refresh here to retest
-app.get("/urls", (req, res) => { 
-  
-  // console.log("Inside /urls route handler", req.cookies["user_id"]);
+app.get("/urls", (req, res) => {
+
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
 
   res.render("urls_index", templateVars);
@@ -110,12 +110,12 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
 
   // if user is not logged in, redirect them to login
-  if(!req.cookies["urls_id"]) {
+  if (!req.cookies["urls_id"]) {
     res.redirect("/login");
   }
 
   const templateVars = { user: users[req.cookies["user_id"]] };
-  
+
   res.render("urls_new", templateVars);
 });
 
@@ -124,31 +124,22 @@ app.get("/urls/:id", (req, res) => {
 
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
-  console.log("Value of checkID is ", checkID);
 
-  if(!checkID) {
+  if (!checkID) {
     res.send("<html>This ID Does Not Exist.</html>");
   }
 
   // checks if user owns the id
   let checkUser = urlsForUser(req.cookies["user_id"]);
-  // console.log(req.cookies["user_id"]);
-  // console.log(checkUser);
-
-  // if (checkUser !== urlDatabase[req.params.id].longURL) {
-  //   res.send("This user does not own the url", 403);
-  //   return;
-  // }
 
   // shows url info
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: users[req.cookies["user_id"]], ownsID: (checkUser === urlDatabase[req.params.id].longURL) };
-  
+
   res.render("urls_show", templateVars);
 });
 
 // This section creates a new URL and adds it to the index
 app.post("/urls", (req, res) => {
-  // console.log(req.body);
 
   if (!req.cookies["urls_id"]) {
     res.send("<html><body>You cannot shorten URL's because you are not logged in</body></html>");
@@ -156,13 +147,12 @@ app.post("/urls", (req, res) => {
   }
 
   let newUrl = getRandomString();
-  urlDatabase[newUrl] = { userID : req.cookies["user_id"], longURL : req.body.longURL }
-  
+  urlDatabase[newUrl] = { userID: req.cookies["user_id"], longURL: req.body.longURL }
+
   // Redirect to URL Index with new Url
-  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]]};
+  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
 
   // add new user
-  // console.log(users[req.cookies["user_id"]]);
   res.render("urls_index", templateVars);
 });
 
@@ -170,9 +160,8 @@ app.post("/urls", (req, res) => {
 app.get("/u/:id", (req, res) => {
 
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
-  console.log("Value of checkID is ", checkID);
 
-  if(!checkID) {
+  if (!checkID) {
     res.send("<html>This ID Does Not Exist.</html>")
   }
 
@@ -185,31 +174,25 @@ app.post("/urls/:id/delete", (req, res) => {
 
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
-  console.log("Value of checkID is ", checkID);
 
-  if(!checkID) {
+  if (!checkID) {
     res.send("<html>This ID Does Not Exist.</html>");
   }
 
   // checks if user owns the id
   let checkUser = urlsForUser(req.cookies["user_id"]);
-  console.log(req.cookies["user_id"]);
-  console.log(checkUser);
-
   if (checkUser !== urlDatabase[req.params.id].longURL) {
     res.send("This user does not own the url", 403);
     return;
   }
 
-  // console.log(req.params);
+  
   delete urlDatabase[req.params.id];
-  // const templateVars = { urls: urlDatabase };
   res.redirect("/urls");
 });
 
 // this section updates the long URL of an ID
 app.post("/urls/:id/longURL", (req, res) => {
-  // console.log(req.body.longURL);
   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
@@ -218,8 +201,7 @@ app.post("/urls/:id/longURL", (req, res) => {
 app.get("/login", (req, res) => {
 
   // if user is already logged in, redirect to /urls
-  // console.log("Check user ID cookie", req.cookies["user_id"]);
-  if(req.cookies["user_id"]) {
+  if (req.cookies["user_id"]) {
     res.redirect("/urls");
   }
 
@@ -229,17 +211,27 @@ app.get("/login", (req, res) => {
 
 // this section lets the user log in
 app.post("/login", (req, res) => {
-  
-  const passwordCheck = req.body.password;
 
   // check if email is present in database
   const existingUser = checkUserDatabase(req.body.email);
-  console.log(existingUser);
+  console.log("Existing user", existingUser);
 
-  // check if email and password are correct
-  if (existingUser && existingUser.password === passwordCheck) {
-    res.cookie("user_id", existingUser.id);
-    res.redirect("/urls");
+  if (existingUser) {
+    
+    // check if password is correct
+    const hashedPassword1 = bcrypt.hashSync(req.body.password, 10);
+    const passwordCheck = bcrypt.compareSync(req.body.password, hashedPassword1);
+    console.log("Check password :", passwordCheck);
+    console.log("Hashed password: ", hashedPassword1);
+    console.log("Existing user password: ", existingUser.password);
+
+    if (passwordCheck) {
+      res.cookie("user_id", existingUser.id);
+      res.redirect("/urls");
+    } else {
+      res.send("Invalid credentials", 400);
+    }
+
   } else {
     res.status(400).send("Invalid credentials");
   }
@@ -256,8 +248,7 @@ app.post("/logout", (req, res) => {
 app.get("/register", (req, res) => {
 
   // if user is already logged in, redirect to /urls
-  // console.log("Check user ID cookie", req.cookies["user_id"]);
-  if(req.cookies["user_id"]) {
+  if (req.cookies["user_id"]) {
     res.redirect("/urls");
   }
 
@@ -268,18 +259,20 @@ app.get("/register", (req, res) => {
 // this section adds a new user to the Users database
 app.post("/register", (req, res) => {
 
-  if((req.body.email).length === 0) {
+  if ((req.body.email).length === 0) {
     res.status(400).send("Please input an email");
   }
 
   const emailPresent = checkUserDatabase(req.body.email) // checks if e-mail is already present 
-  if(emailPresent) {
+  if (emailPresent) {
     res.status(400).send("Invalid credentials");
   }
-  
-  
+
+
   let newRandomId = getRandomString();
-  users[newRandomId] = { id: newRandomId, email: req.body.email, password: req.body.password};
+  let hashedPassword = bcrypt.hashSync(req.body.password, 10);
+  console.log("New hashed password", hashedPassword);
+  users[newRandomId] = { id: newRandomId, email: req.body.email, password: hashedPassword };
   res.cookie("user_id", newRandomId);
   res.redirect("/urls");
 });
