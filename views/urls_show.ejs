@@ -10,7 +10,7 @@
 
 <body>
   <%- include('./partials/_header'); -%>
-  <% if(ownsID) { %>
+  <% if(user) { %>
     <!--This section displays the current URL-->
     <div class="card text-center">
       <div class="card-header"></div>
@@ -22,6 +22,9 @@
             <%= id %>
           </a>
         </p>
+
+        <!--This section shows number of views-->
+        <div>You have viewed this URL <%- timesViewed %> times</div>
 
         <!--This section adds new URL-->
         <form method="POST" action="/urls/<%= id %>?_method=PUT" class="p-3 mb-2 bg-light text-dark">

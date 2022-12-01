@@ -63,18 +63,26 @@ app.get("/urls/:id", (req, res) => {
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
   if (!checkID) {
-    res.send("<html>This ID Does Not Exist.</html>");
+    res.redirect("/error");
   }
 
   // checks if user owns the id
   let checkWebsite = urlsForUser(req.session.user_id, urlDatabase);
 
+  if (!(checkWebsite).includes(urlDatabase[req.params.id].longURL)) {
+    res.redirect("/error");
+    return;
+  }
+
   // shows url info
+  req.session.views = (req.session.views || 0) + 1;
+  console.log("Viewwwwwwws: ", req.session.views);
+
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id].longURL, 
     user: users[req.session.user_id], 
-    ownsID: (checkWebsite.includes(urlDatabase[req.params.id].longURL)) 
+    timesViewed: req.session.views 
   };
 
   res.render("urls_show", templateVars);
@@ -107,7 +115,7 @@ app.get("/u/:id", (req, res) => {
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
 
   if (!checkID) {
-    res.send("<html>This ID Does Not Exist.</html>")
+    res.redirect("/error");
   }
 
   const longURL = urlDatabase[req.params.id].longURL;
@@ -120,13 +128,13 @@ app.delete("/urls/:id", (req, res) => {
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
   if (!checkID) {
-    res.send("<html>This ID Does Not Exist.</html>");
+    res.redirect("/error");
   }
 
   // checks if user owns the id
   let checkWebsite = urlsForUser(req.session.user_id, urlDatabase);
   if (!(checkWebsite.includes(urlDatabase[req.params.id].longURL))) {
-    res.send("This user does not own the url", 403);
+    res.redirect("/error");
     return;
   }
 
@@ -157,26 +165,22 @@ app.post("/login", (req, res) => {
 
   // check if email is present in database
   const existingUser = getUserByEmail(req.body.email, users);
-  console.log("Existing user", existingUser);
 
   if (existingUser) {
     
     // check if password is correct
     const hashedPassword1 = bcrypt.hashSync(req.body.password, 10);
     const passwordCheck = bcrypt.compareSync(req.body.password, hashedPassword1);
-    console.log("Check password :", passwordCheck);
-    console.log("Hashed password: ", hashedPassword1);
-    console.log("Existing user password: ", existingUser.password);
 
     if (passwordCheck) {
       req.session.user_id = existingUser.id;
       res.redirect("/urls");
     } else {
-      res.send("Invalid credentials", 400);
+      res.redirect("/error");
     }
 
   } else {
-    res.status(400).send("Invalid credentials");
+    res.redirect("/error");
   }
 
 });
@@ -203,12 +207,14 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
 
   if ((req.body.email).length === 0) {
-    res.status(400).send("Please input an email");
+    // res.status(400).send("Please input an email");
+    res.redirect("/error");
   }
 
   const emailPresent = getUserByEmail(req.body.email, users) // checks if e-mail is already present 
   if (emailPresent) {
-    res.status(400).send("Invalid credentials");
+    // res.status(400).send("Invalid credentials");
+    res.redirect("/error");
   }
 
   let newRandomId = getRandomString();
@@ -218,3 +224,10 @@ app.post("/register", (req, res) => {
   req.session.user_id = newRandomId;
   res.redirect("/urls");
 });
+
+// error screen
+app.get("/error", (req, res) => {
+  let id = (req.session.userID || null);
+  const templateVars = { user: id };
+  res.render("urls_error", templateVars);
+})
