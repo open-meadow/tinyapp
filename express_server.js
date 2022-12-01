@@ -132,16 +132,16 @@ app.get("/urls/:id", (req, res) => {
 
   // checks if user owns the id
   let checkUser = urlsForUser(req.cookies["user_id"]);
-  console.log(req.cookies["user_id"]);
-  console.log(checkUser);
+  // console.log(req.cookies["user_id"]);
+  // console.log(checkUser);
 
-  if (checkUser !== urlDatabase[req.params.id].longURL) {
-    res.send("This user does not own the url", 403);
-    return;
-  }
+  // if (checkUser !== urlDatabase[req.params.id].longURL) {
+  //   res.send("This user does not own the url", 403);
+  //   return;
+  // }
 
   // shows url info
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: users[req.cookies["user_id"]],  };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: users[req.cookies["user_id"]], ownsID: (checkUser === urlDatabase[req.params.id].longURL) };
   
   res.render("urls_show", templateVars);
 });

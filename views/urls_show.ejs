@@ -10,7 +10,7 @@
 
 <body>
   <%- include('./partials/_header'); -%>
-  <% if(user) { %>
+  <% if(ownsID) { %>
     <!--This section displays the current URL-->
     <div class="card text-center">
       <div class="card-header"></div>
@@ -37,7 +37,7 @@
       <div class="card-footer text-muted"></div>
     </div>
     <% } else { %>
-      <h3 class="d-flex flex-direction-column justify-content-center" style="margin-top: 5em;">You need to be logged in to shorten URL's</h3>
+      <h3 class="d-flex flex-direction-column justify-content-center" style="margin-top: 5em;">You do not own this URL</h3>
     <% } %>
 
     <!-- Bootstrap JS -->
