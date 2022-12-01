@@ -34,14 +34,17 @@
           <tbody>
             <% for (let id in urls) { %>
               <tr>
-                <td><%= id %></td>
-                <td><%= urls[id].longURL %></td>
+                <td><a href="/u/<%= id %>">/u/<%= id %></a></td>
+                <td><a href="urls[id]"><%= urls[id] %></a></td>
                 <td><form method="GET" action="/urls/<%= id %>"><button class="btn btn-outline-primary">Edit</button></form></td>
                 <td><form method="POST" action="/urls/<%= id %>?_method=DELETE"><button class="btn btn-outline-danger">Delete</button></form></td>
               </tr>
             <% } %>
           </tbody>
         </table>
+        <form method="GET" action="/urls/new" class="d-flex justify-content-end">
+          <button class="btn btn-primary btn-sm" type="submit">Get new Short URL</button>
+        </form>
       <% } else { %>
         <h3 class="d-flex flex-direction-column justify-content-center" style="margin-top: 2em;">You need to be logged in to shorten URL's</h3>
         <% } %>

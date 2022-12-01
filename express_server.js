@@ -28,6 +28,13 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
 
+app.get("/", (req, res) => {
+  if(!req.session.user_id) {
+    res.redirect("/login");
+  } else {
+    res.redirect("/urls");
+  }
+});
 
 // Show urlDatabase as JSON file
 app.get("/urls.json", (req, res) => {
@@ -37,9 +44,12 @@ app.get("/urls.json", (req, res) => {
 // render urls_index page. can refresh here to retest
 app.get("/urls", (req, res) => {
 
+  const chosenUrls = urlsForUser(req.session.user_id, urlDatabase);
+  console.log(chosenUrls);
+
   const templateVars = { 
-    urls: urlDatabase, 
-    user: users[req.session.user_id] 
+    urls: chosenUrls, 
+    user: users[req.session.user_id] ,
   };
 
   res.render("urls_index", templateVars);
@@ -67,22 +77,32 @@ app.get("/urls/:id", (req, res) => {
   }
 
   // checks if user owns the id
-  let checkWebsite = urlsForUser(req.session.user_id, urlDatabase);
+  let checkWebsite = Object.values(urlsForUser(req.session.user_id, urlDatabase));
 
   if (!(checkWebsite).includes(urlDatabase[req.params.id].longURL)) {
     res.redirect("/error");
     return;
   }
 
-  // shows url info
-  req.session.views = (req.session.views || 0) + 1;
-  console.log("Viewwwwwwws: ", req.session.views);
+  
+  let obj = {};
+  if(req.session.views) {
+    obj = req.session.views;
+    obj[req.params.id] = obj[req.params.id] + 1;
+    req.session.views = obj;
+  } else {
+    obj[req.params.id] = 1;
+    console.log("Enter obj ", obj);
+    req.session.views = obj;
+    console.log("Req views value ", req.session.views);
+  }
 
+  // shows url info
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id].longURL, 
     user: users[req.session.user_id], 
-    timesViewed: req.session.views 
+    timesViewed: obj[req.params.id] 
   };
 
   res.render("urls_show", templateVars);
@@ -103,10 +123,7 @@ app.post("/urls", (req, res) => {
   };
 
   // Redirect to URL Index with new Url
-  const templateVars = { urls: urlDatabase, user: users[req.session.user_id] };
-
-  // add new user
-  res.render("urls_index", templateVars);
+  res.redirect("/urls");
 });
 
 // this section redirects fron the path to the longURL
@@ -132,7 +149,7 @@ app.delete("/urls/:id", (req, res) => {
   }
 
   // checks if user owns the id
-  let checkWebsite = urlsForUser(req.session.user_id, urlDatabase);
+  let checkWebsite = Object.values(urlsForUser(req.session.user_id, urlDatabase));
   if (!(checkWebsite.includes(urlDatabase[req.params.id].longURL))) {
     res.redirect("/error");
     return;
@@ -213,13 +230,12 @@ app.post("/register", (req, res) => {
 
   const emailPresent = getUserByEmail(req.body.email, users) // checks if e-mail is already present 
   if (emailPresent) {
-    // res.status(400).send("Invalid credentials");
     res.redirect("/error");
   }
 
+  // hash password
   let newRandomId = getRandomString();
   let hashedPassword = bcrypt.hashSync(req.body.password, 10);
-  console.log("New hashed password", hashedPassword);
   users[newRandomId] = { id: newRandomId, email: req.body.email, password: hashedPassword };
   req.session.user_id = newRandomId;
   res.redirect("/urls");
@@ -227,7 +243,7 @@ app.post("/register", (req, res) => {
 
 // error screen
 app.get("/error", (req, res) => {
-  let id = (req.session.userID || null);
-  const templateVars = { user: id };
+  let id = req.session.user_id;
+  const templateVars = { user: users[id] };
   res.render("urls_error", templateVars);
 })

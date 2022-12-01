@@ -31,15 +31,15 @@ const getUserByEmail = (newEmail, users) => {
 // check the URL's a user ID has saved
 const urlsForUser = (id, urlDatabase) => {
   let objKeys = Object.keys(urlDatabase);
-  let urlArrs = [];
+  let urlObjs = {};
 
   for (let i = 0; i < objKeys.length; i++) {
     if (id === urlDatabase[objKeys[i]].userID) {
-      urlArrs.push(urlDatabase[objKeys[i]].longURL);
+      urlObjs[objKeys[i]] = urlDatabase[objKeys[i]].longURL;
     }
   }
 
-  return urlArrs;
+  return urlObjs;
 };
 
 module.exports = { getRandomString, getUserByEmail, urlsForUser };
