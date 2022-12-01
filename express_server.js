@@ -92,9 +92,7 @@ app.get("/urls/:id", (req, res) => {
     req.session.views = obj;
   } else {
     obj[req.params.id] = 1;
-    console.log("Enter obj ", obj);
     req.session.views = obj;
-    console.log("Req views value ", req.session.views);
   }
 
   // shows url info
