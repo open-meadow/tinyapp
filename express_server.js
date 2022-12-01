@@ -45,7 +45,6 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
 
   const chosenUrls = urlsForUser(req.session.user_id, urlDatabase);
-  console.log(chosenUrls);
 
   const templateVars = { 
     urls: chosenUrls, 
