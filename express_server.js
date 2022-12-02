@@ -28,6 +28,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
 
+// redirect to login or urls
 app.get("/", (req, res) => {
   if(!req.session.user_id) {
     res.redirect("/login");
