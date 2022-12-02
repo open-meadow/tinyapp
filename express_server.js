@@ -41,6 +41,11 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// just for fun
+app.get("/users.json", (req, res) => {
+  res.send("Gotcha", 401);
+});
+
 // render urls_index page. can refresh here to retest
 app.get("/urls", (req, res) => {
 
