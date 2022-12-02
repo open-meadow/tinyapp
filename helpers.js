@@ -1,5 +1,3 @@
-const { users, urlDatabase } = require('./database');
-
 // function to get random string to create smaller URL and userID
 const getRandomString = () => {
   // credit to - https://attacomsian.com/blog/javascript-generate-random-string

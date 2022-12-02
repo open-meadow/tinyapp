@@ -93,12 +93,26 @@ app.get("/urls/:id", (req, res) => {
   let obj = {};
   if(req.session.views) {
     obj = req.session.views;
-    obj[req.params.id] = obj[req.params.id] + 1;
+    if(obj[req.params.id]) {
+      obj[req.params.id] += 1;
+    } else {
+      obj[req.params.id] = 1;
+    }
     req.session.views = obj;
+    
   } else {
     obj[req.params.id] = 1;
     req.session.views = obj;
   }
+
+  // if(obj[req.params]) {
+  //   obj[req.params.id] += 1;
+  // } else {
+  //   obj[req.params.id];
+  // }
+
+  console.log("OBJ", obj[req.params.id]);
+  console.log("Req.session", req.session);
 
   // shows url info
   const templateVars = { 
@@ -240,6 +254,7 @@ app.post("/register", (req, res) => {
   let newRandomId = getRandomString();
   let hashedPassword = bcrypt.hashSync(req.body.password, 10);
   users[newRandomId] = { id: newRandomId, email: req.body.email, password: hashedPassword };
+
   req.session.user_id = newRandomId;
   res.redirect("/urls");
 });
