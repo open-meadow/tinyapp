@@ -151,6 +151,14 @@ app.get("/u/:id", (req, res) => {
 
 // this section deletes an id and URL
 app.delete("/urls/:id", (req, res) => {
+  // check if user is logged in
+  if (!req.session.user_id) {
+    res.send(
+      "<html><body>You cannot shorten URL's because you are not logged in</body></html>"
+    );
+    return;
+  }
+
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
   if (!checkID) {
@@ -172,6 +180,23 @@ app.delete("/urls/:id", (req, res) => {
 
 // this section updates the long URL of an ID
 app.put("/urls/:id", (req, res) => {
+  // check if user is logged in
+  if (!req.session.user_id) {
+    res.send(
+      "<html><body>You cannot shorten URL's because you are not logged in</body></html>"
+    );
+    return;
+  }
+
+  // checks if user owns the id
+  let checkWebsite = Object.values(
+    urlsForUser(req.session.user_id, urlDatabase)
+  );
+  if (!checkWebsite.includes(urlDatabase[req.params.id].longURL)) {
+    res.redirect("/error");
+    return;
+  }
+
   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
