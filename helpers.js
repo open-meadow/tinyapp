@@ -40,4 +40,33 @@ const urlsForUser = (id, urlDatabase) => {
   return urlObjs;
 };
 
-module.exports = { getRandomString, getUserByEmail, urlsForUser };
+const updateVisitors = (sessionViews, paramsId) => {
+  // checks number of times the page has been viewed and updates it
+  // let obj = {};
+  // if (sessionViews) {
+  //   obj = sessionViews;
+  //   if (obj[paramsId]) {
+  //     obj[paramsId] += 1;
+  //   } else {
+  //     obj[paramsId] = 1;
+  //   }
+  //   sessionViews = obj;
+  // } else {
+  //   obj[paramsId] = 0;
+  //   sessionViews = obj;
+  // }
+
+  // let obj = {
+  //   paramsId: 0
+  // };
+  // console.log("sessionViews", sessionViews);
+  
+  // if (!sessionViews) {
+  //   sessionViews = 0;
+  //   obj[paramsId] = 0;
+  // }
+
+  // return obj;
+}
+
+module.exports = { getRandomString, getUserByEmail, urlsForUser, updateVisitors };

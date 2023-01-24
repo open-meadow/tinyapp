@@ -2,13 +2,14 @@
 const express = require("express");
 const methodOverride = require("method-override");
 const cookieSession = require("cookie-session");
+const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcryptjs");
 const { name } = require("ejs");
 const app = express();
 const PORT = 8080; // default port 8080
 
 // import functions and databases from other files
-const { getRandomString, getUserByEmail, urlsForUser } = require("./helpers");
+const { getRandomString, getUserByEmail, urlsForUser, updateVisitors } = require("./helpers");
 const { users, urlDatabase } = require("./database");
 
 // use middleware and modules and config
@@ -72,9 +73,9 @@ app.get("/urls/:id", (req, res) => {
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
 
-  console.log("URL Database", urlDatabase);
-  console.log("req.params is.....", req.params);
-  console.log("req.params.id is.....", req.params.id);
+  // console.log("URL Database", urlDatabase);
+  // console.log("req.params is.....", req.params);
+  // console.log("req.params.id is.....", req.params.id);
 
   if (!checkID) {
     res.redirect("/error");
@@ -90,29 +91,14 @@ app.get("/urls/:id", (req, res) => {
     return;
   }
 
-  let obj = {};
-  if (req.session.views) {
-    obj = req.session.views;
-    if (obj[req.params.id]) {
-      obj[req.params.id] += 1;
-    } else {
-      obj[req.params.id] = 1;
-    }
-    req.session.views = obj;
-  } else {
-    obj[req.params.id] = 1;
-    req.session.views = obj;
-  }
-
-  console.log("OBJ", obj[req.params.id]);
-  console.log("Req.session", req.session);
-
   // shows url info
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
     user: users[req.session.user_id],
-    timesViewed: obj[req.params.id],
+    timesViewed: urlDatabase[req.params.id].views,
+    uniqueViews: urlDatabase[req.params.id].uniqueViews,
+    visits: urlDatabase[req.params.id].visits
   };
 
   res.render("urls_show", templateVars);
@@ -131,6 +117,9 @@ app.post("/urls", (req, res) => {
   urlDatabase[newUrl] = {
     userID: req.session.user_id,
     longURL: req.body.longURL,
+    views: 0,
+    uniqueViews: 1,
+    visits: []
   };
 
   // Redirect to URL Index with new Url
@@ -143,6 +132,13 @@ app.get("/u/:id", (req, res) => {
 
   if (!checkID) {
     res.redirect("/error");
+  }
+
+  urlDatabase[req.params.id].views += 1;
+  urlDatabase[req.params.id].visits.push(`Visited on ${new Date()}, by visitor ${req.session.user_id || "Anonymous"}`)
+
+  if(req.session.isNew){  
+    urlDatabase[req.params.id].uniqueViews += 1;
   }
 
   const longURL = urlDatabase[req.params.id].longURL;
