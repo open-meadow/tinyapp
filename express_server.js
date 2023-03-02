@@ -9,7 +9,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 // import functions and databases from other files
-const { getRandomString, getUserByEmail, urlsForUser, updateVisitors } = require("./helpers");
+const { getRandomString, getUserByEmail, urlsForUser } = require("./helpers");
 const { users, urlDatabase } = require("./database");
 
 // use middleware and modules and config
