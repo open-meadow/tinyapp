@@ -73,10 +73,6 @@ app.get("/urls/:id", (req, res) => {
   // check if id exists
   const checkID = Object.keys(urlDatabase).includes(req.params.id);
 
-  // console.log("URL Database", urlDatabase);
-  // console.log("req.params is.....", req.params);
-  // console.log("req.params.id is.....", req.params.id);
-
   if (!checkID) {
     res.redirect("/error");
   }
